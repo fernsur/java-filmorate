@@ -66,7 +66,7 @@ public class FilmController {
         return film;
     }
 
-    private void validateFilm(Film film) throws ValidationException{
+    private void validateFilm(Film film) throws ValidationException {
         if (film.getReleaseDate().isBefore(DATE_BIRTHDAY_MOVIE)) {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года.");
         }
