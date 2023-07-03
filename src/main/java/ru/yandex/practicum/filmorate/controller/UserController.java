@@ -14,8 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.Valid;
 
+import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.ArrayList;
 
 @RestController
@@ -23,23 +24,18 @@ import java.util.ArrayList;
 @Slf4j
 public class UserController {
 
-    private final Map<Integer,User> users = new LinkedHashMap<>();
+    private final Map<Integer,User> users = new HashMap<>();
     private int nextId = 1;
 
     @GetMapping()
-    public ArrayList<User> allUsers() {
+    public List<User> allUsers() {
         log.info("Текущее количество пользователей: {}", users.size());
         return new ArrayList<>(users.values());
     }
 
     @PostMapping()
     public User createUser(@Valid @RequestBody User user) throws ValidationException {
-        try {
-            validateUser(user);
-        } catch (ValidationException exp) {
-            log.warn(exp.getMessage());
-            throw exp;
-        }
+        validateUser(user);
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }
@@ -51,12 +47,7 @@ public class UserController {
 
     @PutMapping()
     public User updateUser(@Valid @RequestBody User user) throws ValidationException {
-        try {
-            validateUser(user);
-        } catch (ValidationException exp) {
-            log.warn(exp.getMessage());
-            throw exp;
-        }
+        validateUser(user);
         if (!users.containsKey(user.getId())) {
             log.warn("Пользователь с id = {} не существует", user.getId());
             throw new ValidationException("Такого пользователя нет.");
@@ -67,8 +58,10 @@ public class UserController {
     }
 
     private void validateUser(User user) throws ValidationException {
-        if (user.getLogin().matches("/^\\S*$/")) {
-            throw new ValidationException("Логин не может содержать пробелы.");
+        if (user.getLogin().contains(" ")) {
+            String warning = "Логин не может содержать пробелы.";
+            log.warn(warning);
+            throw new ValidationException(warning);
         }
     }
 }

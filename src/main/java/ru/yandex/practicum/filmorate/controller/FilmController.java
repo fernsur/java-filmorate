@@ -16,8 +16,9 @@ import javax.validation.Valid;
 
 import java.time.LocalDate;
 
+import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.ArrayList;
 
 @RestController
@@ -25,24 +26,19 @@ import java.util.ArrayList;
 @Slf4j
 public class FilmController {
 
-    private final Map<Integer, Film> films = new LinkedHashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
     private int nextId = 1;
     private static final LocalDate DATE_BIRTHDAY_MOVIE = LocalDate.of(1895,12,28);
 
     @GetMapping()
-    public ArrayList<Film> allFilms() {
+    public List<Film> allFilms() {
         log.info("Текущее количество фильмов: {}", films.size());
         return new ArrayList<>(films.values());
     }
 
     @PostMapping()
     public Film addFilm(@Valid @RequestBody Film film) throws ValidationException {
-        try {
-            validateFilm(film);
-        } catch (ValidationException exp) {
-            log.warn(exp.getMessage());
-            throw exp;
-        }
+        validateFilm(film);
         film.setId(nextId++);
         films.put(film.getId(), film);
         log.info("Добавленный фильм: {}",film);
@@ -51,12 +47,7 @@ public class FilmController {
 
     @PutMapping()
     public Film updateFilm(@Valid @RequestBody Film film) throws ValidationException {
-        try {
-            validateFilm(film);
-        } catch (ValidationException exp) {
-            log.warn(exp.getMessage());
-            throw exp;
-        }
+        validateFilm(film);
         if (!films.containsKey(film.getId())) {
             log.warn("Такого фильма нет.");
             throw new ValidationException("Такого фильма нет.");
@@ -68,7 +59,9 @@ public class FilmController {
 
     private void validateFilm(Film film) throws ValidationException {
         if (film.getReleaseDate().isBefore(DATE_BIRTHDAY_MOVIE)) {
-            throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года.");
+            String warning = "Дата релиза должна быть не раньше 28 декабря 1895 года.";
+            log.warn(warning);
+            throw new ValidationException(warning);
         }
     }
 }
