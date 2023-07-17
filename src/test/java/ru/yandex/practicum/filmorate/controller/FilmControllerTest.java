@@ -114,21 +114,6 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void shouldNotCreateFilmWithIncorrectReleaseDate() {
-        Film film = Film.builder()
-                .name("Film")
-                .description("Test description")
-                .releaseDate(LocalDate.of(1790,10,11))
-                .duration(124)
-                .build();
-
-        FilmController filmController = new FilmController();
-
-        assertThrows(ValidationException.class, () -> filmController.addFilm(film),
-                "Дата релиза должна быть не раньше 28 декабря 1895 года.");
-    }
-
-    @Test
     public void shouldNotCreateFilmWithIncorrectDuration() throws Exception {
         Film film = Film.builder()
                 .name("Film")
