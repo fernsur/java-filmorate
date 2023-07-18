@@ -56,6 +56,9 @@ public class InMemoryUserStorage implements UserStorage {
             log.warn(warning);
             throw new UserNotFoundException(warning);
         }
+        for (User user: users.values()) {
+            user.deleteFriend(id);
+        }
         users.remove(id);
     }
 }

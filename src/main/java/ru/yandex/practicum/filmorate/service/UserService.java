@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -22,7 +23,7 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public User userById(Integer id) {
+    public User userById(int id) {
         return userStorage.getById(id);
     }
 
@@ -31,6 +32,7 @@ public class UserService {
     }
 
     public User createUser(User user) {
+        validateUser(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -38,17 +40,18 @@ public class UserService {
     }
 
     public User updateUser(User user) {
+        validateUser(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         return userStorage.updateUser(user);
     }
 
-    public void deleteUser(Integer id) {
+    public void deleteUser(int id) {
         userStorage.deleteUser(id);
     }
 
-    public User addFriend(Integer id, Integer friendId) {
+    public User addFriend(int id, int friendId) {
         User user1 = userStorage.getById(id);
         User user2 = userStorage.getById(friendId);
         user1.addFriend(friendId);
@@ -57,7 +60,7 @@ public class UserService {
         return user1;
     }
 
-    public void deleteFriend(Integer id, Integer friendId) {
+    public void deleteFriend(int id, int friendId) {
         User user1 = userStorage.getById(id);
         User user2 = userStorage.getById(friendId);
         user1.deleteFriend(friendId);
@@ -65,7 +68,7 @@ public class UserService {
         log.debug("Друг удален.");
     }
 
-    public List<User> friends(Integer id) {
+    public List<User> getUserFriends(int id) {
         User user = userStorage.getById(id);
         List<User> friends = user.getFriends()
                 .stream()
@@ -75,7 +78,7 @@ public class UserService {
         return friends;
     }
 
-    public List<User> commonFriends(Integer id, Integer otherId) {
+    public List<User> commonFriends(int id, int otherId) {
         Set<Integer> friendsUser1 = userStorage.getById(id).getFriends();
         Set<Integer> friendsUser2 = userStorage.getById(otherId).getFriends();
 
@@ -88,5 +91,13 @@ public class UserService {
                 .collect(Collectors.toList());
         log.debug("Получен список из" + friends.size() + "общих друзей.");
         return friends;
+    }
+
+    private void validateUser(User user) {
+        if (user.getLogin().contains(" ")) {
+            String warning = "Логин не может содержать пробелы.";
+            log.warn(warning);
+            throw new ValidationException(warning);
+        }
     }
 }

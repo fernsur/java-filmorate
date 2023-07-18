@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -19,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.Valid;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -27,7 +25,6 @@ import java.util.List;
 @Slf4j
 public class FilmController {
     private final FilmService filmService;
-    private static final LocalDate DATE_BIRTHDAY_MOVIE = LocalDate.of(1895,12,28);
 
     @Autowired
     public FilmController(FilmService filmService) {
@@ -35,7 +32,7 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public Film filmById(@PathVariable Integer id) {
+    public Film filmById(@PathVariable int id) {
         log.info("Получен GET-запрос к эндпоинту /films/{id} на получение фильма по id.");
         return filmService.filmById(id);
     }
@@ -56,42 +53,32 @@ public class FilmController {
     @PostMapping()
     public Film addFilm(@Valid @RequestBody Film film) {
         log.info("Получен POST-запрос к эндпоинту /films на добавление фильма.");
-        validateFilm(film);
         return filmService.createFilm(film);
     }
 
     @PutMapping()
     public Film updateFilm(@Valid @RequestBody Film film) {
         log.info("Получен PUT-запрос к эндпоинту /films на обновление фильма.");
-        validateFilm(film);
         return filmService.updateFilm(film);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film likeFilm(@PathVariable Integer id,
-                         @PathVariable Integer userId) {
+    public Film addLike(@PathVariable int id,
+                        @PathVariable int userId) {
         log.info("Получен PUT-запрос к эндпоинту /films/{id}/like/{userId} на добавление лайка конкретному фильму.");
-        return filmService.like(id,userId);
+        return filmService.addLike(id,userId);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteFilm(@PathVariable Integer id) {
+    public void deleteFilm(@PathVariable int id) {
         log.info("Получен DELETE-запрос к эндпоинту /films/{id} на удаление фильма.");
         filmService.deleteFilm(id);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLikeFilm(@PathVariable Integer id,
-                               @PathVariable Integer userId) {
+    public void deleteLike(@PathVariable int id,
+                           @PathVariable int userId) {
         log.info("Получен DELETE-запрос к эндпоинту /films/{id}/like/{userId} на удаление лайка у конкретного фильма.");
         filmService.deleteLike(id,userId);
-    }
-
-    private void validateFilm(Film film) throws ValidationException {
-        if (film.getReleaseDate().isBefore(DATE_BIRTHDAY_MOVIE)) {
-            String warning = "Дата релиза должна быть не раньше 28 декабря 1895 года.";
-            log.warn(warning);
-            throw new ValidationException(warning);
-        }
     }
 }
