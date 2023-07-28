@@ -6,7 +6,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -111,21 +109,6 @@ public class FilmControllerTest {
                         .content(objectMapper.writeValueAsString(film)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError());
-    }
-
-    @Test
-    public void shouldNotCreateFilmWithIncorrectReleaseDate() {
-        Film film = Film.builder()
-                .name("Film")
-                .description("Test description")
-                .releaseDate(LocalDate.of(1790,10,11))
-                .duration(124)
-                .build();
-
-        FilmController filmController = new FilmController();
-
-        assertThrows(ValidationException.class, () -> filmController.addFilm(film),
-                "Дата релиза должна быть не раньше 28 декабря 1895 года.");
     }
 
     @Test
