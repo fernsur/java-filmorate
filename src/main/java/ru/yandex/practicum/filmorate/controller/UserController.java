@@ -69,10 +69,10 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public User addFriend(@PathVariable int id,
+    public void addFriend(@PathVariable int id,
                           @PathVariable int friendId) {
         log.info("Получен PUT-запрос к эндпоинту /users/{id}/friends/{friendId} на добавление в друзья.");
-        return userService.addFriend(id,friendId);
+        userService.addFriend(id,friendId);
     }
 
     @DeleteMapping("/{id}")

@@ -63,10 +63,10 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film addLike(@PathVariable int id,
+    public void addLike(@PathVariable int id,
                         @PathVariable int userId) {
         log.info("Получен PUT-запрос к эндпоинту /films/{id}/like/{userId} на добавление лайка конкретному фильму.");
-        return filmService.addLike(id,userId);
+        filmService.addLike(id,userId);
     }
 
     @DeleteMapping("/{id}")

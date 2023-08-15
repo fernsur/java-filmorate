@@ -2,25 +2,28 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.HashSet;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
-
     private final UserStorage userStorage;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, JdbcTemplate jdbcTemplate) {
         this.userStorage = userStorage;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public User userById(int id) {
@@ -51,46 +54,33 @@ public class UserService {
         userStorage.deleteUser(id);
     }
 
-    public User addFriend(int id, int friendId) {
-        User user1 = userStorage.getById(id);
-        User user2 = userStorage.getById(friendId);
-        user1.addFriend(friendId);
-        user2.addFriend(id);
-        log.debug("Друг добавлен.");
-        return user1;
+    public void addFriend(int userId, int friendId) {
+        validationId(userId, friendId);
+        String sqlIns = "INSERT INTO FRIENDS (FROM_USER_ID, TO_USER_ID) VALUES (?, ?)";
+        jdbcTemplate.update(sqlIns, userId, friendId);
+        log.debug("Пользователь " + userId + " добавил в друзья пользователя " + friendId);
     }
 
-    public void deleteFriend(int id, int friendId) {
-        User user1 = userStorage.getById(id);
-        User user2 = userStorage.getById(friendId);
-        user1.deleteFriend(friendId);
-        user2.deleteFriend(id);
-        log.debug("Друг удален.");
+    public void deleteFriend(int userId, int friendId) {
+        validationId(userId, friendId);
+        String sql = "DELETE FROM FRIENDS WHERE FROM_USER_ID = ? AND TO_USER_ID = ?";
+        jdbcTemplate.update(sql, userId, friendId);
+        log.debug("Пользователь удален из друзей");
     }
 
     public List<User> getUserFriends(int id) {
-        User user = userStorage.getById(id);
-        List<User> friends = user.getFriends()
-                .stream()
-                .map(userStorage::getById)
-                .collect(Collectors.toList());
-        log.debug("Список друзей получен.");
-        return friends;
+        String sql = "SELECT * FROM USERS AS U WHERE U.USER_ID IN " +
+                "(SELECT F.TO_USER_ID FROM FRIENDS AS F WHERE F.FROM_USER_ID = ?);";
+        return jdbcTemplate.query(sql, this::makeUser, id);
     }
 
     public List<User> commonFriends(int id, int otherId) {
-        Set<Integer> friendsUser1 = userStorage.getById(id).getFriends();
-        Set<Integer> friendsUser2 = userStorage.getById(otherId).getFriends();
-
-        Set<Integer> commonId = new HashSet<>(friendsUser1);
-        commonId.retainAll(friendsUser2);
-
-        List<User> friends = commonId
-                .stream()
-                .map(userStorage::getById)
-                .collect(Collectors.toList());
-        log.debug("Получен список из" + friends.size() + "общих друзей.");
-        return friends;
+        validationId(id, otherId);
+        String sql = "SELECT * FROM USERS AS U WHERE U.USER_ID IN " +
+                "(SELECT F.TO_USER_ID FROM FRIENDS AS F WHERE F.FROM_USER_ID = ?" +
+                " INTERSECT " +
+                "SELECT FR.TO_USER_ID FROM FRIENDS AS FR WHERE FR.FROM_USER_ID = ?);";
+        return jdbcTemplate.query(sql, this::makeUser, id, otherId);
     }
 
     private void validateUser(User user) {
@@ -99,5 +89,23 @@ public class UserService {
             log.warn(warning);
             throw new ValidationException(warning);
         }
+    }
+
+    private void validationId(int userId, int friendId) {
+        if (userId < 0 || friendId < 0) {
+            String warning = "Передан некорректный идентификатор";
+            log.warn(warning);
+            throw new UserNotFoundException(warning);
+        }
+    }
+
+    private User makeUser(ResultSet rs, int rowNum) throws SQLException {
+        return User.builder()
+                .id(rs.getInt("USER_ID"))
+                .email(rs.getString("EMAIL"))
+                .login(rs.getString("LOGIN"))
+                .name(rs.getString("NAME"))
+                .birthday(rs.getDate("BIRTHDAY").toLocalDate())
+                .build();
     }
 }
