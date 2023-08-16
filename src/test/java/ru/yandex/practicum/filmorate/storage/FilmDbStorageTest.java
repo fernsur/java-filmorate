@@ -20,12 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Sql({"/schema.sql","/data.sql"})
 public class FilmDbStorageTest {
 
     private final FilmStorage filmStorage;
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldCreateAndGetFilm() {
         Film film = Film.builder()
                 .name("Film")
@@ -43,7 +43,6 @@ public class FilmDbStorageTest {
     }
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldUpdateFilm() {
         Film film1 = Film.builder()
                 .name("Film")
@@ -74,7 +73,6 @@ public class FilmDbStorageTest {
     }
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldReturnAllUsers() {
         List<Film> films = new ArrayList<>();
 
@@ -108,7 +106,6 @@ public class FilmDbStorageTest {
     }
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldDeleteUser() {
         Film film = Film.builder()
                 .name("Film")

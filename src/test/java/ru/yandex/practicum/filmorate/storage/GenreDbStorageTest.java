@@ -18,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Sql({"/schema.sql","/data.sql"})
 public class GenreDbStorageTest {
 
     private final GenreStorage genreStorage;
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldGetGenre() {
         Genre genre = Genre.builder()
                 .id(1)
@@ -34,7 +34,6 @@ public class GenreDbStorageTest {
     }
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldGetAllGenres() {
         List<Genre> genres = new ArrayList<>();
         Genre genre1 = Genre.builder()

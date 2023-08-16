@@ -19,12 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Sql({"/schema.sql","/data.sql"})
 public class UserDbStorageTest {
 
     private final UserStorage userStorage;
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldCreateAndGetUser() {
         User user = User.builder()
                 .email("test@mail.ru")
@@ -38,7 +38,6 @@ public class UserDbStorageTest {
     }
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldUpdateUser() {
         User user1 = User.builder()
                 .email("test@mail.ru")
@@ -61,7 +60,6 @@ public class UserDbStorageTest {
     }
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldReturnAllUsers() {
         List<User> users = new ArrayList<>();
 
@@ -87,7 +85,6 @@ public class UserDbStorageTest {
     }
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldDeleteUser() {
         User user = User.builder()
                 .email("test@mail.ru")

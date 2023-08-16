@@ -18,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Sql({"/schema.sql","/data.sql"})
 public class MpaDbStorageTest {
 
     private final MpaStorage mpaStorage;
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldGetMpa() {
         Mpa mpa = Mpa.builder()
                 .id(1)
@@ -34,7 +34,6 @@ public class MpaDbStorageTest {
     }
 
     @Test
-    @Sql({"/schema.sql","/data.sql"})
     public void shouldGetAllMpa() {
         List<Mpa> mpaAll = new ArrayList<>();
         Mpa mpa1 = Mpa.builder()

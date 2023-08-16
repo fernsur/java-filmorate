@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
@@ -40,6 +41,18 @@ public class MpaDbStorage implements MpaStorage {
     @Override
     public List<Mpa> getAllMpa() {
         return jdbcTemplate.query("SELECT * FROM MPA_RATING", this::makeMpa);
+    }
+
+    @Override
+    public Film writeMpa(Film film) {
+        String sqlMpa = "SELECT NAME FROM MPA_RATING WHERE MPA_RATING_ID = ?";
+
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sqlMpa, film.getMpa().getId());
+        sqlRowSet.next();
+        String mpa = sqlRowSet.getString("NAME");
+        film.getMpa().setName(mpa);
+
+        return film;
     }
 
     private Mpa makeMpa(ResultSet rs, int rowNum) throws SQLException {
