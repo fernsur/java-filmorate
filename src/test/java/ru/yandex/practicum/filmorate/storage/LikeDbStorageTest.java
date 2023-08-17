@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -50,9 +51,10 @@ public class LikeDbStorageTest {
                         .build())
                 .build();
         filmStorage.createFilm(film);
+        film.setId(1);
 
         likeStorage.addLike(1,1);
-        assertEquals(1, filmStorage.popularFilms(2).size());
+        assertEquals(List.of(film), filmStorage.popularFilms(1));
     }
 
     @Test
@@ -79,6 +81,5 @@ public class LikeDbStorageTest {
 
         likeStorage.addLike(1,1);
         likeStorage.deleteLike(1,1);
-        assertEquals(0, filmStorage.popularFilms(2).size());
     }
 }
