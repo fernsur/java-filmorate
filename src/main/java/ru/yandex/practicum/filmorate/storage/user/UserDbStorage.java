@@ -91,20 +91,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(int userId, int friendId) {
-        String sqlIns = "INSERT INTO FRIENDS (USER_ID, FRIEND_ID) VALUES (?, ?)";
-        jdbcTemplate.update(sqlIns, userId, friendId);
-        log.debug("Пользователь " + userId + " добавил в друзья пользователя " + friendId);
-    }
-
-    @Override
-    public void deleteFriend(int userId, int friendId) {
-        String sql = "DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?";
-        jdbcTemplate.update(sql, userId, friendId);
-        log.debug("Пользователь удален из друзей");
-    }
-
-    @Override
     public List<User> getUserFriends(int id) {
         String sql = "SELECT * FROM USERS AS U WHERE U.USER_ID IN " +
                 "(SELECT F.FRIEND_ID FROM FRIENDS AS F WHERE F.USER_ID = ?);";

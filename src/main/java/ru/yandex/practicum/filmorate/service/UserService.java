@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -15,10 +16,12 @@ import java.util.List;
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private final FriendStorage friendStorage;
 
     @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FriendStorage friendStorage) {
         this.userStorage = userStorage;
+        this.friendStorage = friendStorage;
     }
 
     public User userById(int id) {
@@ -51,12 +54,12 @@ public class UserService {
 
     public void addFriend(int userId, int friendId) {
         validationId(userId, friendId);
-        userStorage.addFriend(userId, friendId);
+        friendStorage.addFriend(userId, friendId);
     }
 
     public void deleteFriend(int userId, int friendId) {
         validationId(userId, friendId);
-        userStorage.deleteFriend(userId, friendId);
+        friendStorage.deleteFriend(userId, friendId);
     }
 
     public List<User> getUserFriends(int id) {

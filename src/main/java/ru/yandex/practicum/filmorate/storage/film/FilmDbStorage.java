@@ -139,20 +139,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(int filmId, int userId) {
-        String sql = "INSERT INTO FILM_LIKE (FILM_ID, USER_ID) VALUES (?, ?)";
-        jdbcTemplate.update(sql, filmId, userId);
-        log.debug("Лайк пользователя" + userId + "поставлен фильму " + filmId);
-    }
-
-    @Override
-    public void deleteLike(int filmId, int userId) {
-        String sql = "DELETE FROM FILM_LIKE WHERE FILM_ID = ? AND USER_ID = ?";
-        jdbcTemplate.update(sql, filmId, userId);
-        log.debug("Лайк пользователя" + userId + "удален у фильма " + filmId);
-    }
-
-    @Override
     public List<Film> popularFilms(int count) {
         String sql = "SELECT F.FILM_ID FROM FILMS AS F " +
                 "LEFT JOIN FILM_LIKE AS FL ON F.FILM_ID = FL.FILM_ID " +
