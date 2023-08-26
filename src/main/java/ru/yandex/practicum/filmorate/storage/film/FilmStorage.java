@@ -14,4 +14,6 @@ public interface FilmStorage {
     Film updateFilm(Film film);
 
     void deleteFilm(Integer id);
+
+    List<Film> popularFilms(int count);
 }

@@ -1,13 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,23 +26,18 @@ public class Film {
     private LocalDate releaseDate;
 
     @Positive(message = "Продолжительность фильма не может быть отрицательной.")
-    private long duration;
+    private int duration;
 
-    @JsonIgnore
-    private final Set<Integer> likes = new HashSet<>();
+    @NotNull(message = "Рейтинг не может быть пустым")
+    private Mpa mpa;
 
-    public void addLike(int id) {
-        likes.add(id);
+    private final Set<Genre> genres = new HashSet<>();
+
+    public void addGenre(Genre genre) {
+        genres.add(genre);
     }
 
-    public void deleteLike(int id) {
-        if (!likes.contains(id)) {
-            throw new UserNotFoundException("Нельзя удалить лайк. Лайка от пользователя не существует.");
-        }
-        likes.remove(id);
-    }
-
-    public int countLike() {
-        return likes.size();
+    public void clearGenres() {
+        genres.clear();
     }
 }

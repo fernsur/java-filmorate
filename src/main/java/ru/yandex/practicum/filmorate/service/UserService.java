@@ -2,25 +2,26 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
-
     private final UserStorage userStorage;
+    private final FriendStorage friendStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FriendStorage friendStorage) {
         this.userStorage = userStorage;
+        this.friendStorage = friendStorage;
     }
 
     public User userById(int id) {
@@ -51,46 +52,23 @@ public class UserService {
         userStorage.deleteUser(id);
     }
 
-    public User addFriend(int id, int friendId) {
-        User user1 = userStorage.getById(id);
-        User user2 = userStorage.getById(friendId);
-        user1.addFriend(friendId);
-        user2.addFriend(id);
-        log.debug("Друг добавлен.");
-        return user1;
+    public void addFriend(int userId, int friendId) {
+        validationId(userId, friendId);
+        friendStorage.addFriend(userId, friendId);
     }
 
-    public void deleteFriend(int id, int friendId) {
-        User user1 = userStorage.getById(id);
-        User user2 = userStorage.getById(friendId);
-        user1.deleteFriend(friendId);
-        user2.deleteFriend(id);
-        log.debug("Друг удален.");
+    public void deleteFriend(int userId, int friendId) {
+        validationId(userId, friendId);
+        friendStorage.deleteFriend(userId, friendId);
     }
 
     public List<User> getUserFriends(int id) {
-        User user = userStorage.getById(id);
-        List<User> friends = user.getFriends()
-                .stream()
-                .map(userStorage::getById)
-                .collect(Collectors.toList());
-        log.debug("Список друзей получен.");
-        return friends;
+        return userStorage.getUserFriends(id);
     }
 
     public List<User> commonFriends(int id, int otherId) {
-        Set<Integer> friendsUser1 = userStorage.getById(id).getFriends();
-        Set<Integer> friendsUser2 = userStorage.getById(otherId).getFriends();
-
-        Set<Integer> commonId = new HashSet<>(friendsUser1);
-        commonId.retainAll(friendsUser2);
-
-        List<User> friends = commonId
-                .stream()
-                .map(userStorage::getById)
-                .collect(Collectors.toList());
-        log.debug("Получен список из" + friends.size() + "общих друзей.");
-        return friends;
+        validationId(id, otherId);
+        return userStorage.commonFriends(id, otherId);
     }
 
     private void validateUser(User user) {
@@ -98,6 +76,14 @@ public class UserService {
             String warning = "Логин не может содержать пробелы.";
             log.warn(warning);
             throw new ValidationException(warning);
+        }
+    }
+
+    private void validationId(int userId, int friendId) {
+        if (userId < 0 || friendId < 0) {
+            String warning = "Передан некорректный идентификатор";
+            log.warn(warning);
+            throw new UserNotFoundException(warning);
         }
     }
 }
