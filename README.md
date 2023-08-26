@@ -3,7 +3,7 @@
 
 ### Модель базы данных (ER-диаграмма)
 
-![Модель базы данных](/Users/alcorw/java-filmorate/ER-диаграмма БД.png)
+![Модель базы данных](/Users/alcorw/java-filmorate/ER-диаграмма.png)
 
 ### Примеры sql-запросов к базе
 
